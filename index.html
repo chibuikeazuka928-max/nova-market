@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="google-site-verification" content="A2EyuYCK2IJRQvGR6uaTU_x8Gq3N00OPFuM5uK8GnGM" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nova Market — Buy & Sell Online</title>
+<meta name="description" content="Nova Market is an online marketplace where people can list products, discover items, and shop online.">
+<meta name="robots" content="index,follow,max-image-preview:large">
+<link rel="canonical" href="/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Nova Market — Buy & Sell Online">
+<meta property="og:description" content="Discover products and list your own items on Nova Market.">
+<meta property="og:url" content="/">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{
+  "@context":"https://schema.org",
+  "@type":"WebSite",
+  "name":"Nova Market",
+  "url":"/",
+  "potentialAction":{"@type":"SearchAction","target":"/?q={search_term_string}","query-input":"required name=search_term_string"}
+}</script>
+<style>
+  :root{
+    --paper:#F1EEE6;
+    --ink:#1B1B18;
+    --forest:#1F3D2B;
+    --forest-dim:#2C5039;
+    --brass:#C08A28;
+    --brass-dim:#A6741E;
+    --line:#D8D2C2;
+    --white:#FFFFFF;
+    --danger:#8C3B2E;
+  }
+  body[data-theme="dark"]{
+    --paper:#15170F;
+    --ink:#ECE7D8;
+    --white:#1E2117;
+    --line:#33362A;
+    --forest:#6FAE82;
+    --forest-dim:#5C9670;
+    --brass:#D9A542;
+    --brass-dim:#C08A28;
+    --danger:#C1503C;
+  }
+  body[data-theme="dark"] .hero p, body[data-theme="dark"] .hero-card p{color:#C9C4B0;}
+  body[data-theme="dark"] .card .blurb{color:#B7B29E;}
+  body[data-theme="dark"] .empty{color:#8f8b78;}
+  body[data-theme="dark"] .card .thumb{background:#262920;color:#8f8b78;}
+  body[data-theme="dark"] #imgPreview{color:#8f8b78;}
+  body[data-theme="dark"] .msg.bot{background:#243026;color:#DCEDE0;}
+  body[data-theme="dark"] .msg.user{background:#20231b;}
+  body[data-theme="dark"] .demo-note{background:#2E2712;color:#E9C97A;}
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Segoe UI', -apple-system, BlinkMacSystemFont, Helvetica, Arial, sans-serif;
+    line-height:1.5;
+    transition:background 0.2s ease, color 0.2s ease;
+  }
+  h1,h2,h3,.serif{
+    font-family:'Iowan Old Style','Palatino Linotype','Book Antiqua', Georgia, serif;
+    font-weight:600;
+    margin:0;
+  }
+  a{color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+
+  /* NAV */
+  nav{
+    display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;row-gap:10px;
+    padding:20px 32px;border-bottom:1px solid var(--line);
+    position:sticky;top:0;background:var(--paper);z-index:50;
+  }
+  .brand{font-size:22px;letter-spacing:0.2px;color:var(--forest);}
+  .brand span{color:var(--brass);}
+  .navlinks{display:flex;gap:22px;align-items:center;font-size:15px;flex-wrap:wrap;row-gap:8px;}
+  .navlinks button.linklike{
+    background:none;border:none;color:var(--ink);font-size:15px;padding:0;
+    border-bottom:1px solid transparent;
+  }
+  .navlinks button.linklike:hover{border-bottom:1px solid var(--brass);}
+  #themeToggle{
+    background:none;border:1px solid var(--line);color:var(--ink);
+    padding:9px 14px;border-radius:2px;font-size:13.5px;white-space:nowrap;
+  }
+  #themeToggle:hover{border-color:var(--brass);}
+  #cartBtn{
+    background:var(--forest);color:var(--white);border:none;
+    padding:10px 18px;border-radius:2px;font-size:14px;display:flex;gap:8px;align-items:center;white-space:nowrap;
+  }
+  #cartBtn:hover{background:var(--forest-dim);}
+
+  /* HERO */
+  .hero{
+    position:relative;overflow:hidden;
+    display:grid;grid-template-columns:1.2fr 0.8fr;gap:40px;
+    padding:64px 32px 56px;max-width:1180px;margin:0 auto;align-items:center;
+  }
+  .hero::before{
+    content:'';position:absolute;inset:-30%;z-index:0;pointer-events:none;
+    background:linear-gradient(120deg, var(--forest) 0%, var(--brass) 35%, var(--paper) 65%, var(--forest-dim) 100%);
+    background-size:300% 300%;opacity:0.12;
+    animation:driftGradient 20s ease-in-out infinite;
+  }
+  .hero > *{position:relative;z-index:1;}
+  @keyframes driftGradient{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .hero::before{animation:none;}
+  }
+  .hero h1{font-size:52px;line-height:1.08;max-width:14ch;}
+  .hero p{font-size:17px;max-width:44ch;margin-top:18px;color:#3B3A34;}
+  .hero-ctas{display:flex;gap:14px;margin-top:28px;}
+  .btn-primary{
+    background:var(--forest);color:var(--white);border:none;padding:13px 22px;
+    font-size:15px;border-radius:2px;
+  }
+  .btn-primary:hover{background:var(--forest-dim);}
+  .btn-secondary{
+    background:transparent;color:var(--forest);border:1px solid var(--forest);
+    padding:13px 22px;font-size:15px;border-radius:2px;
+  }
+  .btn-secondary:hover{background:rgba(31,61,43,0.06);}
+  .hero-card{
+    background:var(--white);border:1px solid var(--line);padding:22px;border-radius:2px;
+  }
+  .hero-card .tag{color:var(--brass-dim);font-size:13px;margin-bottom:8px;}
+  .hero-card p{font-size:14.5px;color:#3B3A34;margin:6px 0 0;}
+
+  section{max-width:1180px;margin:0 auto;padding:48px 32px;}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:24px;border-bottom:1px solid var(--line);padding-bottom:14px;}
+  .section-head h2{font-size:28px;}
+  .section-head .count{font-size:14px;color:#6B6A63;}
+
+  /* SELL FORM */
+  #sell{background:var(--white);border-top:1px solid var(--line);border-bottom:1px solid var(--line);}
+  .sell-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;}
+  label{display:block;font-size:13px;color:#6B6A63;margin-bottom:6px;margin-top:16px;}
+  label:first-child{margin-top:0;}
+  input[type=text], input[type=number], textarea, select{
+    width:100%;padding:11px 12px;border:1px solid var(--line);background:var(--paper);
+    font-size:15px;border-radius:2px;font-family:inherit;color:var(--ink);
+  }
+  textarea{resize:vertical;min-height:90px;}
+  .ai-inline{display:flex;gap:8px;margin-top:8px;align-items:center;}
+  .btn-ai{
+    background:none;border:1px solid var(--brass-dim);color:var(--brass-dim);
+    padding:7px 12px;font-size:13px;border-radius:2px;
+  }
+  .btn-ai:hover{background:rgba(192,138,40,0.08);}
+  .btn-ai:disabled{opacity:0.5;cursor:default;}
+  #imgPreview{
+    margin-top:10px;width:100%;height:220px;border:1px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;overflow:hidden;color:#8a8878;font-size:13px;
+  }
+  #imgPreview img{width:100%;height:100%;object-fit:cover;}
+  input[type=file]{margin-top:6px;font-size:13px;}
+  #listBtn{margin-top:22px;}
+  .form-msg{font-size:13px;margin-top:10px;color:var(--forest);}
+
+  /* MARKETPLACE */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:22px;}
+  .card{background:var(--white);border:1px solid var(--line);border-radius:2px;overflow:hidden;display:flex;flex-direction:column;}
+  .card .thumb{height:170px;background:#E7E2D4;display:flex;align-items:center;justify-content:center;overflow:hidden;color:#9a9788;font-size:13px;}
+  .card .thumb img{width:100%;height:100%;object-fit:cover;}
+  .card .body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1;}
+  .card .cat{font-size:12px;color:var(--brass-dim);}
+  .card h3{font-size:16.5px;}
+  .card .blurb{font-size:13px;color:#565449;flex:1;}
+  .card .price{font-size:17px;font-weight:600;color:var(--forest);margin-top:4px;}
+  .card .addbtn{
+    margin-top:8px;background:var(--ink);color:var(--white);border:none;padding:9px;
+    font-size:13.5px;border-radius:2px;
+  }
+  .card .addbtn:hover{background:#000;}
+  .empty{color:#8a8878;font-size:14.5px;padding:30px 0;}
+
+  /* CART DRAWER */
+  #overlay{position:fixed;inset:0;background:rgba(20,20,15,0.35);display:none;z-index:90;}
+  #cartDrawer{
+    position:fixed;top:0;right:-420px;width:400px;max-width:92vw;height:100%;background:var(--white);
+    z-index:100;transition:right 0.25s ease;display:flex;flex-direction:column;
+  }
+  #cartDrawer.open{right:0;}
+  #overlay.show{display:block;}
+  .drawer-head{padding:22px 22px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;}
+  .drawer-head h3{font-size:20px;}
+  .drawer-head button{background:none;border:none;font-size:20px;color:#6B6A63;}
+  #cartItems{flex:1;overflow-y:auto;padding:16px 22px;}
+  .cart-row{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14.5px;}
+  .cart-row .rm{background:none;border:none;color:var(--danger);font-size:12.5px;text-decoration:underline;padding:0;margin-top:4px;}
+  .drawer-foot{padding:18px 22px 22px;border-top:1px solid var(--line);}
+  .subtotal{display:flex;justify-content:space-between;font-size:16px;margin-bottom:14px;}
+
+  /* CHECKOUT */
+  #checkoutPanel{padding:16px 0;}
+  #checkoutPanel .step{color:#6B6A63;font-size:12.5px;margin-bottom:2px;}
+  .demo-note{
+    background:#FBF3E3;border:1px solid var(--brass);color:#5C4413;font-size:12.5px;
+    padding:10px 12px;border-radius:2px;margin-bottom:14px;
+  }
+
+  /* ASSISTANT */
+  #assistantBtn{
+    position:fixed;bottom:24px;right:24px;background:var(--forest);color:var(--white);
+    border:none;border-radius:2px;padding:14px 18px;font-size:14.5px;z-index:80;
+    box-shadow:0 2px 10px rgba(0,0,0,0.18);display:flex;gap:8px;align-items:center;
+  }
+  #assistantBtn:hover{background:var(--forest-dim);}
+  #assistantPanel{
+    position:fixed;bottom:24px;right:24px;width:360px;max-width:90vw;height:480px;max-height:75vh;
+    background:var(--white);border:1px solid var(--line);z-index:81;display:none;
+    flex-direction:column;box-shadow:0 6px 24px rgba(0,0,0,0.2);
+  }
+  #assistantPanel.open{display:flex;}
+  .a-head{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;background:var(--forest);color:var(--white);}
+  .a-head span{font-size:14.5px;}
+  .a-head button{background:none;border:none;color:var(--white);font-size:18px;}
+  #chatLog{flex:1;overflow-y:auto;padding:14px 16px;display:flex;flex-direction:column;gap:10px;}
+  .msg{font-size:13.5px;padding:9px 12px;border-radius:3px;max-width:85%;}
+  .msg.user{align-self:flex-end;background:var(--paper);}
+  .msg.bot{align-self:flex-start;background:#EEF3EF;color:#1B2E20;}
+  .msg.typing{align-self:flex-start;color:#8a8878;font-style:italic;}
+  .a-input{display:flex;border-top:1px solid var(--line);}
+  .a-input input{flex:1;border:none;padding:12px;font-size:14px;background:var(--white);}
+  .a-input button{border:none;background:var(--brass-dim);color:var(--white);padding:0 16px;font-size:13.5px;}
+  .a-input button:hover{background:var(--brass);}
+
+  footer{padding:30px 32px;text-align:center;font-size:12.5px;color:#8a8878;border-top:1px solid var(--line);}
+
+  @media(max-width:820px){
+    .hero{grid-template-columns:1fr;}
+    .sell-grid{grid-template-columns:1fr;}
+    .hero h1{font-size:38px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="brand">Nova <span>Market</span></div>
+  <div class="navlinks">
+    <button class="linklike" onclick="scrollTo('marketplace')">Shop</button>
+    <button class="linklike" onclick="scrollTo('sell')">Sell</button>
+    <button id="themeToggle" onclick="toggleTheme()">🌙 Dark mode</button>
+    <button id="cartBtn" onclick="openCart()">Cart (<span id="cartCount">0</span>)</button>
+  </div>
+</nav>
+
+<div class="hero">
+  <div>
+    <h1>List it today. The world can buy it tonight.</h1>
+    <p>A marketplace stall that's open around the clock. Upload a photo and a price — the assistant handles the sales copy, and a built-in shopping assistant helps buyers find what they need.</p>
+    <div class="hero-ctas">
+      <button class="btn-primary" onclick="scrollTo('sell')">List an item</button>
+      <button class="btn-secondary" onclick="scrollTo('marketplace')">Browse marketplace</button>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="tag">Demo build</div>
+    <h3 style="font-size:19px;">This is a working prototype</h3>
+    <p>Listings save to this artifact and are visible to anyone who opens it. Checkout is simulated — no card or bank details are collected or charged. Going fully live (a public domain, search visibility, real payments) is the next step, whenever you're ready.</p>
+  </div>
+</div>
+
+<section id="sell">
+  <div class="section-head">
+    <h2>List an item</h2>
+  </div>
+  <div class="sell-grid">
+    <div>
+      <label>Title</label>
+      <input type="text" id="f-title" placeholder="e.g. Hand-thrown ceramic mug">
+      <label>Category</label>
+      <select id="f-cat">
+        <option>Home & Living</option>
+        <option>Fashion & Accessories</option>
+        <option>Art & Prints</option>
+        <option>Electronics</option>
+        <option>Handmade & Craft</option>
+        <option>Other</option>
+      </select>
+      <label>Price (USD)</label>
+      <input type="number" id="f-price" placeholder="24.00" min="0" step="0.01">
+      <label>Description</label>
+      <textarea id="f-desc" placeholder="What is it, what's it made of, why would someone want it?"></textarea>
+      <div class="ai-inline">
+        <button class="btn-ai" id="genDescBtn" onclick="generateDescription()">✨ Write this for me</button>
+        <button class="btn-ai" id="genAdBtn" onclick="generateAd()">✨ Write ad copy</button>
+      </div>
+      <div id="formMsg" class="form-msg"></div>
+      <button class="btn-primary" id="listBtn" onclick="listItem()">List item</button>
+    </div>
+    <div>
+      <label>Photo</label>
+      <input type="file" id="f-image" accept="image/*" onchange="previewImage(event)">
+      <div id="imgPreview">No photo selected</div>
+    </div>
+  </div>
+</section>
+
+<section id="marketplace">
+  <div class="section-head">
+    <h2>Marketplace</h2>
+    <span class="count"><span id="itemCount">0</span> items listed</span>
+  </div>
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;">
+    <input id="marketSearch" type="search" placeholder="Search products..." aria-label="Search products" style="flex:1;min-width:220px;padding:11px 12px;border:1px solid var(--line);background:var(--white);color:var(--ink);">
+    <select id="marketCategory" aria-label="Filter by category" style="width:auto;min-width:180px;">
+      <option value="">All categories</option>
+      <option>Home & Living</option><option>Fashion & Accessories</option><option>Art & Prints</option><option>Electronics</option><option>Handmade & Craft</option><option>Other</option>
+    </select>
+  </div>
+  <div class="grid" id="productGrid"></div>
+</section>
+
+<footer>Nova Market — online marketplace. Product listings and checkout are provided by the site owner.</footer>
+
+<div id="overlay" onclick="closeCart()"></div>
+<div id="cartDrawer">
+  <div class="drawer-head"><h3>Your cart</h3><button onclick="closeCart()">&times;</button></div>
+  <div id="cartItems"></div>
+  <div class="drawer-foot">
+    <div id="checkoutForm" style="display:none;">
+      <div class="demo-note">You'll enter your card details on Stripe's secure checkout page — this site never sees or stores them.</div>
+      <div id="checkoutPanel">
+        <div class="step">Shipping details</div>
+        <label>Full name</label>
+        <input type="text" id="co-name">
+        <label>Email</label>
+        <input type="text" id="co-email">
+        <label>Shipping address</label>
+        <input type="text" id="co-address">
+      </div>
+    </div>
+    <div class="subtotal"><span>Subtotal</span><span id="cartSubtotal">$0.00</span></div>
+    <button class="btn-primary" style="width:100%;" id="checkoutBtn" onclick="handleCheckout()">Checkout</button>
+  </div>
+</div>
+
+<button id="assistantBtn" onclick="toggleAssistant()">💬 Shopping assistant</button>
+<div id="assistantPanel">
+  <div class="a-head"><span>Nova Market Assistant</span><button onclick="toggleAssistant()">&times;</button></div>
+  <div id="chatLog"></div>
+  <div class="a-input">
+    <input type="text" id="chatInput" placeholder="Ask about products..." onkeydown="if(event.key==='Enter')sendChat()">
+    <button onclick="sendChat()">Send</button>
+  </div>
+</div>
+
+<script>
+let products = [];
+let cart = [];
+let currentImageData = null;
+let marketSearch = '';
+let marketCategory = '';
+
+async function callClaude(promptText, systemText){
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ prompt: promptText, system: systemText || "" })
+  });
+  const data = await res.json();
+  if(data.error) throw new Error(data.error);
+  return data.text;
+}
+
+function scrollTo(id){document.getElementById(id).scrollIntoView({behavior:'smooth'});}
+
+function previewImage(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    currentImageData = reader.result;
+    document.getElementById('imgPreview').innerHTML = `<img src="${reader.result}">`;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function generateDescription(){
+  const title = document.getElementById('f-title').value.trim();
+  const cat = document.getElementById('f-cat').value;
+  if(!title){ setFormMsg('Add a title first.'); return; }
+  const btn = document.getElementById('genDescBtn');
+  btn.disabled = true; btn.textContent = 'Writing...';
+  try{
+    const text = await callClaude(
+      `Write a short, appealing product description (2-3 sentences, plain and specific, no hype words like "amazing" or "must-have") for a marketplace listing titled "${title}" in the category "${cat}".`,
+      "You write concise, honest e-commerce product descriptions."
+    );
+    document.getElementById('f-desc').value = text;
+  } catch(e){ setFormMsg('Could not generate description right now.'); }
+  btn.disabled = false; btn.textContent = '✨ Write this for me';
+}
+
+async function generateAd(){
+  const title = document.getElementById('f-title').value.trim();
+  const desc = document.getElementById('f-desc').value.trim();
+  if(!title){ setFormMsg('Add a title first.'); return; }
+  const btn = document.getElementById('genAdBtn');
+  btn.disabled = true; btn.textContent = 'Writing...';
+  try{
+    const text = await callClaude(
+      `Write one punchy one-line ad/tagline (under 12 words) for this product: "${title}". ${desc ? 'Context: '+desc : ''} Return only the line, no quotes.`,
+      "You write short marketplace ad taglines."
+    );
+    setFormMsg('Ad idea: "' + text + '"');
+  } catch(e){ setFormMsg('Could not generate ad copy right now.'); }
+  btn.disabled = false; btn.textContent = '✨ Write ad copy';
+}
+
+function setFormMsg(t){document.getElementById('formMsg').textContent = t;}
+
+async function listItem(){
+  const title = document.getElementById('f-title').value.trim();
+  const cat = document.getElementById('f-cat').value;
+  const price = parseFloat(document.getElementById('f-price').value);
+  const desc = document.getElementById('f-desc').value.trim();
+  if(!title || isNaN(price)){ setFormMsg('Add at least a title and price.'); return; }
+  const product = {
+    id: 'p_' + Date.now(),
+    title, category: cat, price, description: desc || 'No description provided.',
+    image: currentImageData
+  };
+  products.unshift(product);
+  await saveProducts(product);
+  renderProducts();
+  document.getElementById('f-title').value = '';
+  document.getElementById('f-price').value = '';
+  document.getElementById('f-desc').value = '';
+  document.getElementById('imgPreview').innerHTML = 'No photo selected';
+  currentImageData = null;
+  setFormMsg('Listed! Scroll down to see it in the marketplace.');
+}
+
+async function saveProducts(product){
+  try{
+    await fetch('/api/products', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(product)
+    });
+  } catch(e){ console.error('save failed', e); }
+}
+
+async function loadProducts(){
+  try{
+    const res = await fetch('/api/products');
+    products = await res.json();
+  } catch(e){ products = []; }
+  renderProducts();
+}
+
+function renderProducts(){
+  const grid = document.getElementById('productGrid');
+  const query = marketSearch.toLowerCase();
+  const visible = products.filter(p => {
+    const matchesText = !query || `${p.title} ${p.description || ''} ${p.category || ''}`.toLowerCase().includes(query);
+    const matchesCategory = !marketCategory || p.category === marketCategory;
+    return matchesText && matchesCategory;
+  });
+  document.getElementById('itemCount').textContent = products.length;
+  if(products.length === 0){
+    grid.innerHTML = '<div class="empty">No items listed yet — be the first.</div>';
+    return;
+  }
+  if(visible.length === 0){
+    grid.innerHTML = '<div class="empty">No products match that search.</div>';
+    return;
+  }
+  grid.innerHTML = visible.map(p => `
+    <div class="card">
+      <div class="thumb">${p.image ? `<img src="${p.image}">` : 'No photo'}</div>
+      <div class="body">
+        <div class="cat">${escapeHtml(p.category)}</div>
+        <h3><a href="/product/${encodeURIComponent(p.id)}" style="text-decoration:none;">${escapeHtml(p.title)}</a></h3>
+        <div class="blurb">${escapeHtml(p.description)}</div>
+        <div class="price">$${p.price.toFixed(2)}</div>
+        <button class="addbtn" onclick="addToCart('${p.id}')">Add to cart</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function escapeHtml(s){
+  const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+}
+
+async function addToCart(id){
+  const p = products.find(x=>x.id===id);
+  if(!p) return;
+  cart.push(p);
+  await saveCart();
+  renderCart();
+}
+
+async function saveCart(){
+  try{ localStorage.setItem('novaCart', JSON.stringify(cart)); }
+  catch(e){ console.error('save cart failed', e); }
+}
+
+async function loadCart(){
+  try{ cart = JSON.parse(localStorage.getItem('novaCart')) || []; }
+  catch(e){ cart = []; }
+  renderCart();
+}
+
+function renderCart(){
+  document.getElementById('cartCount').textContent = cart.length;
+  const itemsEl = document.getElementById('cartItems');
+  if(cart.length === 0){
+    itemsEl.innerHTML = '<div class="empty">Your cart is empty.</div>';
+  } else {
+    itemsEl.innerHTML = cart.map((p, i) => `
+      <div class="cart-row">
+        <div>
+          <div>${escapeHtml(p.title)}</div>
+          <button class="rm" onclick="removeFromCart(${i})">Remove</button>
+        </div>
+        <div>$${p.price.toFixed(2)}</div>
+      </div>
+    `).join('');
+  }
+  const subtotal = cart.reduce((s,p)=>s+p.price, 0);
+  document.getElementById('cartSubtotal').textContent = '$' + subtotal.toFixed(2);
+}
+
+async function removeFromCart(i){
+  cart.splice(i,1);
+  await saveCart();
+  renderCart();
+}
+
+function openCart(){
+  document.getElementById('cartDrawer').classList.add('open');
+  document.getElementById('overlay').classList.add('show');
+}
+function closeCart(){
+  document.getElementById('cartDrawer').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('checkoutForm').style.display = 'none';
+  document.getElementById('checkoutBtn').textContent = 'Checkout';
+}
+
+async function handleCheckout(){
+  const formVisible = document.getElementById('checkoutForm').style.display === 'block';
+  if(cart.length === 0) return;
+  if(!formVisible){
+    document.getElementById('checkoutForm').style.display = 'block';
+    document.getElementById('checkoutBtn').textContent = 'Continue to payment';
+    return;
+  }
+  document.getElementById('checkoutBtn').textContent = 'Redirecting...';
+  document.getElementById('checkoutBtn').disabled = true;
+  try{
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ items: cart.map(p => ({ title: p.title, price: p.price, quantity: 1 })) })
+    });
+    const data = await res.json();
+    if(data.url){
+      window.location.href = data.url; // hands off to Stripe's hosted, secure payment page
+    } else {
+      throw new Error(data.error || 'Could not start checkout');
+    }
+  } catch(e){
+    document.getElementById('checkoutBtn').textContent = 'Continue to payment';
+    document.getElementById('checkoutBtn').disabled = false;
+    alert('Checkout is not connected yet. Make sure the server is running with a valid Stripe key.');
+  }
+}
+
+function toggleAssistant(){
+  const panel = document.getElementById('assistantPanel');
+  const btn = document.getElementById('assistantBtn');
+  panel.classList.toggle('open');
+  btn.style.display = panel.classList.contains('open') ? 'none' : 'flex';
+}
+
+function toggleTheme(){
+  const next = document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  document.body.setAttribute('data-theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️ Light mode' : '🌙 Dark mode';
+  try{ localStorage.setItem('novaTheme', next); } catch(e){}
+}
+
+async function loadTheme(){
+  try{
+    if(localStorage.getItem('novaTheme') === 'dark'){
+      document.body.setAttribute('data-theme', 'dark');
+      document.getElementById('themeToggle').textContent = '☀️ Light mode';
+    }
+  } catch(e){}
+}
+
+let chatHistory = [];
+async function sendChat(){
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text) return;
+  input.value = '';
+  const log = document.getElementById('chatLog');
+  log.innerHTML += `<div class="msg user">${escapeHtml(text)}</div>`;
+  log.innerHTML += `<div class="msg typing" id="typingMsg">Thinking...</div>`;
+  log.scrollTop = log.scrollHeight;
+
+  const catalog = products.map(p => `${p.title} ($${p.price}, ${p.category}): ${p.description}`).join('\n') || 'No products listed yet.';
+  const system = `You are a helpful, concise shopping assistant for "Nova Market". Only recommend items from this catalog. If nothing fits, say so honestly.\n\nCatalog:\n${catalog}`;
+
+  try{
+    const reply = await callClaude(text, system);
+    document.getElementById('typingMsg').remove();
+    log.innerHTML += `<div class="msg bot">${escapeHtml(reply)}</div>`;
+  } catch(e){
+    document.getElementById('typingMsg').remove();
+    log.innerHTML += `<div class="msg bot">Sorry, I couldn't respond just now.</div>`;
+  }
+  log.scrollTop = log.scrollHeight;
+}
+
+document.getElementById('marketSearch').addEventListener('input', e => { marketSearch = e.target.value; renderProducts(); });
+document.getElementById('marketCategory').addEventListener('change', e => { marketCategory = e.target.value; renderProducts(); });
+
+const initialQuery = new URLSearchParams(location.search).get('q');
+if(initialQuery){ document.getElementById('marketSearch').value = initialQuery; marketSearch = initialQuery; }
+
+loadProducts();
+loadCart();
+loadTheme();
+</script>
+</body>
+</html>
