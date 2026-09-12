@@ -87,7 +87,7 @@ app.get('/robots.txt', (req, res) => {
 });
 
 app.get('/sitemap.xml', (req, res) => {
-  const origin = `${req.protocol}://${req.get('host')}`;
+  const origin = `https://${req.get('host')}`;
   const products = loadProductsFromDisk();
   const urls = [`${origin}/`, ...products.map(p => `${origin}/product/${encodeURIComponent(p.id)}`)];
   const body = urls.map(u => `<url><loc>${escXml(u)}</loc></url>`).join('');
