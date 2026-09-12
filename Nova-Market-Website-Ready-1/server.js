@@ -1,4 +1,4 @@
-require('dotenv').config();
+ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const Stripe = require('stripe');
@@ -8,6 +8,7 @@ const path = require('path');
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '5mb' })); // higher limit since product photos are sent as base64
+
 // Basic security / caching headers for a public deployment.
 app.disable('x-powered-by');
 app.use((req, res, next) => {
@@ -23,10 +24,15 @@ const stripe = process.env.STRIPE_SECRET_KEY ? Stripe(process.env.STRIPE_SECRET_
 // Simple file-based product store — good for getting started.
 // Swap for a real database (Supabase/Postgres/Mongo) before you have real concurrent traffic.
 const PRODUCTS_FILE = path.join(__dirname, 'products.json');
+
 function loadProductsFromDisk() {
-  try { return JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8')); }
-  catch (e) { return []; }
+  try {
+    return JSON.parse(fs.readFileSync(PRODUCTS_FILE, 'utf8'));
+  } catch (e) {
+    return [];
+  }
 }
+
 function saveProductsToDisk(products) {
   fs.writeFileSync(PRODUCTS_FILE, JSON.stringify(products, null, 2));
 }
@@ -36,26 +42,42 @@ app.get('/api/products', (req, res) => {
 });
 
 app.get('/api/products/:id', (req, res) => {
-  const product = loadProductsFromDisk().find(p => String(p.id) === String(req.params.id));
-  if (!product) return res.status(404).json({ error: 'Product not found' });
+  const product = loadProductsFromDisk().find(
+    p => String(p.id) === String(req.params.id)
+  );
+
+  if (!product) {
+    return res.status(404).json({ error: 'Product not found' });
+  }
+
   res.json(product);
 });
 
-// Search-engine friendly product pages. Product data is rendered in the HTML so
-// crawlers can discover individual listings instead of relying only on JS.
+// Search-engine friendly product pages.
 app.get('/product/:id', (req, res) => {
-  const product = loadProductsFromDisk().find(p => String(p.id) === String(req.params.id));
+  const product = loadProductsFromDisk().find(
+    p => String(p.id) === String(req.params.id)
+  );
+
   if (!product) return res.status(404).send('Product not found');
 
   const esc = value => String(value ?? '')
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/\"/g, '&quot;').replace(/'/g, '&#39;');
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
   const origin = `https://${req.get('host')}`;
   const url = `${origin}/product/${encodeURIComponent(product.id)}`;
   const title = esc(product.title);
-  const description = esc(product.description || `Buy ${product.title} on Nova Market.`);
+  const description = esc(
+    product.description || `Buy ${product.title} on Nova Market.`
+  );
+
   const displayImage = product.image ? String(product.image) : '';
   const image = displayImage.startsWith('http') ? displayImage : '';
+
   const schema = JSON.stringify({
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -63,7 +85,13 @@ app.get('/product/:id', (req, res) => {
     description: product.description || '',
     category: product.category || 'Other',
     ...(image ? { image: [image] } : {}),
-    offers: { '@type': 'Offer', priceCurrency: 'USD', price: Number(product.price || 0), availability: 'https://schema.org/InStock', url }
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'USD',
+      price: Number(product.price || 0),
+      availability: 'https://schema.org/InStock',
+      url
+    }
   }).replace(/<\/script/gi, '<\\/script');
 
   res.send(`<!doctype html><html lang=\"en\"><head>
@@ -83,80 +111,134 @@ app.get('/product/:id', (req, res) => {
 
 app.get('/robots.txt', (req, res) => {
   const origin = `${req.protocol}://${req.get('host')}`;
-  res.type('text/plain').send(`User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`);
+  res.type('text/plain').send(
+    `User-agent: *\nAllow: /\nSitemap: ${origin}/sitemap.xml\n`
+  );
 });
 
 app.get('/sitemap.xml', (req, res) => {
   const origin = `https://${req.get('host')}`;
   const products = loadProductsFromDisk();
-  const urls = [`${origin}/`, ...products.map(p => `${origin}/product/${encodeURIComponent(p.id)}`)];
-  const body = urls.map(u => `<url><loc>${escXml(u)}</loc></url>`).join('');
-  res.type('application/xml').send(`<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">${body}</urlset>`);
+
+  const urls = [
+    `${origin}/`,
+    ...products.map(
+      p => `${origin}/product/${encodeURIComponent(p.id)}`
+    )
+  ];
+
+  const body = urls
+    .map(u => `<url><loc>${escXml(u)}</loc></url>`)
+    .join('');
+
+  res
+    .type('application/xml')
+    .send(
+      `<?xml version=\"1.0\" encoding=\"UTF-8\"?><urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">${body}</urlset>`
+    );
 });
 
 function escXml(value) {
-  return String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&apos;');
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\"/g, '&quot;')
+    .replace(/'/g, '&apos;');
 }
 
 app.post('/api/products', (req, res) => {
   const product = req.body;
+
   if (!product || !product.title || typeof product.price !== 'number') {
     return res.status(400).json({ error: 'Invalid product' });
   }
+
   const products = loadProductsFromDisk();
   products.unshift(product);
   saveProductsToDisk(products);
+
   res.json({ ok: true });
 });
 
-// AI endpoint: browser calls this, server calls Claude with the real key.
-// The API key never reaches the browser.
-app.post('/api/chat', async (req, res) => {
-  if (!process.env.ANTHROPIC_API_KEY) {
-    return res.status(500).json({ error: 'Server is missing ANTHROPIC_API_KEY. Add it to your .env file.' });
+// Built-in Nova Market assistant.
+// This version does NOT require an external AI API key.
+app.post('/api/chat', (req, res) => {
+  const { prompt } = req.body;
+
+  if (!prompt) {
+    return res.status(400).json({ error: 'Missing prompt' });
   }
-  try {
-    const { prompt, system } = req.body;
-    if (!prompt) return res.status(400).json({ error: 'Missing prompt' });
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: system || '',
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
+  const question = String(prompt).toLowerCase().trim();
+  const products = loadProductsFromDisk();
 
-    if (!response.ok) {
-      const errText = await response.text();
-      console.error('Anthropic API error:', errText);
-      return res.status(502).json({ error: 'AI request failed' });
+  let text;
+
+  if (
+    question.includes('hello') ||
+    question.includes('hi') ||
+    question.includes('hey')
+  ) {
+    text = "Hey! 👋 Welcome to Nova Market. How can I help you today?";
+  } else if (
+    question.includes('what is nova market') ||
+    question.includes('what is nova')
+  ) {
+    text = "Nova Market is an online marketplace where you can browse products, add items to your cart, and check out.";
+  } else if (
+    question.includes('product') ||
+    question.includes('what do you sell') ||
+    question.includes('what do you have')
+  ) {
+    if (products.length === 0) {
+      text = "There aren't any products listed yet. Check back soon!";
+    } else {
+      const names = products
+        .slice(0, 8)
+        .map(p => p.title)
+        .join(', ');
+
+      text = `We currently have these products listed: ${names}.`;
     }
-
-    const data = await response.json();
-    const text = (data.content || []).map(b => b.text || '').join('\n').trim();
-    res.json({ text });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'AI request failed' });
+  } else if (
+    question.includes('buy') ||
+    question.includes('purchase') ||
+    question.includes('order')
+  ) {
+    text = "To buy something, choose a product, add it to your cart, then use the checkout option to complete your order.";
+  } else if (question.includes('cart')) {
+    text = "Your cart contains the products you've selected. Open the cart, review your items, and continue to checkout when you're ready.";
+  } else if (
+    question.includes('checkout') ||
+    question.includes('payment') ||
+    question.includes('pay')
+  ) {
+    text = "Nova Market uses the checkout system to process payments securely. Add your items to the cart and continue to checkout.";
+  } else if (
+    question.includes('help') ||
+    question.includes('how')
+  ) {
+    text = "I can help with Nova Market products, buying, your cart, checkout, and general questions about the website. What would you like to know?";
+  } else {
+    text = "I'm Nova Market's built-in assistant. I can help you find products, explain how to buy something, use your cart, or understand checkout. Try asking me one of those!";
   }
+
+  res.json({ text });
 });
 
 // Checkout endpoint: creates a Stripe-hosted payment page for the cart.
 // Card details are entered on Stripe's page, never on this server.
 app.post('/api/create-checkout-session', async (req, res) => {
   if (!stripe) {
-    return res.status(500).json({ error: 'Server is missing STRIPE_SECRET_KEY. Add it to your .env file.' });
+    return res.status(500).json({
+      error: 'Server is missing STRIPE_SECRET_KEY. Add it to your .env file.'
+    });
   }
+
   try {
     const { items } = req.body;
+
     if (!items || !Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: 'No items in cart' });
     }
@@ -164,13 +246,17 @@ app.post('/api/create-checkout-session', async (req, res) => {
     const line_items = items.map(item => ({
       price_data: {
         currency: 'usd',
-        product_data: { name: String(item.title).slice(0, 250) },
+        product_data: {
+          name: String(item.title).slice(0, 250)
+        },
         unit_amount: Math.round(Number(item.price) * 100)
       },
       quantity: item.quantity || 1
     }));
 
-    const origin = req.headers.origin || `http://localhost:${process.env.PORT || 3000}`;
+    const origin =
+      req.headers.origin ||
+      `http://localhost:${process.env.PORT || 3000}`;
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -183,9 +269,14 @@ app.post('/api/create-checkout-session', async (req, res) => {
     res.json({ url: session.url });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Could not create checkout session' });
+    res.status(500).json({
+      error: 'Could not create checkout session'
+    });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Nova Market server running at http://localhost:${PORT}`));
+
+app.listen(PORT, () =>
+  console.log(`Nova Market server running at http://localhost:${PORT}`)
+);
