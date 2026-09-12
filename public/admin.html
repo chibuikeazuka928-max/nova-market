@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Nova Market Admin</title>
+<style>
+:root{--paper:#f1eee6;--ink:#1b1b18;--white:#fff;--forest:#1f3d2b;--brass:#c08a28;--line:#d8d2c2;--danger:#8c3b2e}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:system-ui,sans-serif}header{background:var(--forest);color:#fff;padding:18px 24px;display:flex;justify-content:space-between;align-items:center}header a,header button{color:#fff}.wrap{max-width:1100px;margin:0 auto;padding:24px}.panel{background:var(--white);border:1px solid var(--line);padding:20px;margin-bottom:22px}input,textarea,select{width:100%;padding:11px;border:1px solid var(--line);background:var(--paper);color:var(--ink);font:inherit}label{display:block;font-size:13px;margin:12px 0 6px}.row{display:grid;grid-template-columns:1fr 1fr;gap:14px}.btn{border:0;background:var(--forest);color:#fff;padding:10px 14px;cursor:pointer}.btn.danger{background:var(--danger)}.msg{margin-top:10px;font-size:13px}.hidden{display:none}.table{width:100%;border-collapse:collapse}.table th,.table td{border-bottom:1px solid var(--line);padding:10px;text-align:left;font-size:13px;vertical-align:top}.badge{padding:4px 7px;border:1px solid var(--line);font-size:12px;display:inline-block}.top{display:flex;justify-content:space-between;gap:12px;align-items:center}.small{font-size:12px;color:#777}.actions{display:flex;gap:7px;flex-wrap:wrap}@media(max-width:700px){.row{grid-template-columns:1fr}.table{display:block;overflow-x:auto}}
+</style>
+</head>
+<body>
+<header><strong>Nova Market Admin</strong><div class="actions"><a href="/">View store</a><button id="logout" class="btn" style="display:none">Log out</button></div></header>
+<div class="wrap">
+<section id="loginPanel" class="panel"><h2>Seller/Admin login</h2><p class="small">This dashboard is protected by the ADMIN_PASSWORD environment variable on your server.</p><label>Password</label><input id="password" type="password"><br><br><button class="btn" onclick="login()">Log in</button><div id="loginMsg" class="msg"></div></section>
+<div id="dashboard" class="hidden">
+<section class="panel"><div class="top"><div><h2>Add a product</h2><p class="small">Once added, the product appears on the public marketplace.</p></div></div>
+<div class="row"><div><label>Title</label><input id="title"><label>Category</label><select id="category"><option>Home & Living</option><option>Fashion & Accessories</option><option>Art & Prints</option><option>Electronics</option><option>Handmade & Craft</option><option>Other</option></select><label>Price (USD)</label><input id="price" type="number" min="0" step="0.01"></div><div><label>Image URL (optional)</label><input id="image" placeholder="https://..."><label>Description</label><textarea id="description"></textarea></div></div><br><button class="btn" onclick="addProduct()">Add product</button><div id="productMsg" class="msg"></div></section>
+<section class="panel"><div class="top"><div><h2>Products</h2><p class="small">Manage your current listings.</p></div><button class="btn" onclick="loadProducts()">Refresh</button></div><div id="products"></div></section>
+<section class="panel"><div class="top"><div><h2>Orders</h2><p class="small">New orders appear here. Paid orders can be moved through processing, shipping and delivery.</p></div><button class="btn" onclick="loadOrders()">Refresh</button></div><div id="orders"></div></section>
+</div></div>
+<script>
+let token=localStorage.getItem('novaAdminToken')||'';
+const $=id=>document.getElementById(id);
+function auth(){return token?{Authorization:'Bearer '+token}:{} }
+async function api(url,opts={}){opts.headers={...(opts.headers||{}),...auth(),'Content-Type':'application/json'};const r=await fetch(url,opts);const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'Request failed');return d;}
+async function login(){try{const d=await api('/api/admin/login',{method:'POST',body:JSON.stringify({password:$('password').value})});token=d.token;localStorage.setItem('novaAdminToken',token);showDashboard();}catch(e){$('loginMsg').textContent=e.message;}}
+function showDashboard(){$('loginPanel').classList.add('hidden');$('dashboard').classList.remove('hidden');$('logout').style.display='inline-block';loadProducts();loadOrders();}
+async function logout(){try{await api('/api/admin/logout',{method:'POST'})}catch(e){}token='';localStorage.removeItem('novaAdminToken');location.reload();}
+async function addProduct(){try{const d=await api('/api/admin/products',{method:'POST',body:JSON.stringify({title:$('title').value,category:$('category').value,price:Number($('price').value),description:$('description').value,image:$('image').value||null})});$('productMsg').textContent='Added '+d.product.title;$('title').value='';$('price').value='';$('description').value='';$('image').value='';loadProducts();}catch(e){$('productMsg').textContent=e.message;}}
+async function loadProducts(){try{const ps=await api('/api/products');$('products').innerHTML=ps.length?'<table class="table"><tr><th>Product</th><th>Price</th><th>Category</th><th></th></tr>'+ps.map(p=>`<tr><td>${esc(p.title)}<br><span class="small">${esc(p.description||'')}</span></td><td>$${Number(p.price).toFixed(2)}</td><td>${esc(p.category||'Other')}</td><td><button class="btn danger" onclick="deleteProduct('${p.id}')">Delete</button></td></tr>`).join('')+'</table>':'<p class="small">No products yet.</p>'}catch(e){$('products').textContent=e.message;}}
+async function deleteProduct(id){if(!confirm('Delete this product?'))return;try{await api('/api/admin/products/'+encodeURIComponent(id),{method:'DELETE'});loadProducts();}catch(e){alert(e.message);}}
+async function loadOrders(){try{const os=await api('/api/admin/orders');$('orders').innerHTML=os.length?'<table class="table"><tr><th>Order</th><th>Customer</th><th>Items</th><th>Total</th><th>Status</th></tr>'+os.map(o=>`<tr><td>${esc(o.id)}<br><span class="small">${new Date(o.createdAt).toLocaleString()}</span></td><td>${esc(o.customer?.name)}<br>${esc(o.customer?.email)}<br>${esc(o.customer?.address)}</td><td>${o.items.map(i=>esc(i.title)+' × '+i.quantity).join('<br>')}</td><td>$${Number(o.total).toFixed(2)}</td><td><select onchange="updateOrder('${o.id}',this.value)">${['pending_payment','paid','processing','shipped','delivered','cancelled'].map(s=>`<option ${o.status===s?'selected':''}>${s}</option>`).join('')}</select></td></tr>`).join('')+'</table>':'<p class="small">No orders yet.</p>'}catch(e){$('orders').textContent=e.message;}}
+async function updateOrder(id,status){try{await api('/api/admin/orders/'+encodeURIComponent(id),{method:'PATCH',body:JSON.stringify({status})});}catch(e){alert(e.message);loadOrders();}}
+function esc(s){const d=document.createElement('div');d.textContent=s??'';return d.innerHTML;}
+$('logout').onclick=logout;
+if(token)showDashboard();
+</script>
+</body></html>
