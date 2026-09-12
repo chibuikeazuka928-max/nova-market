@@ -50,7 +50,7 @@ app.get('/product/:id', (req, res) => {
   const esc = value => String(value ?? '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
     .replace(/\"/g, '&quot;').replace(/'/g, '&#39;');
-  const origin = `${req.protocol}://${req.get('host')}`;
+  const origin = `https://${req.get('host')}`;
   const url = `${origin}/product/${encodeURIComponent(product.id)}`;
   const title = esc(product.title);
   const description = esc(product.description || `Buy ${product.title} on Nova Market.`);
